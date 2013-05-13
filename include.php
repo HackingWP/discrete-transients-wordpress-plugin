@@ -58,8 +58,11 @@ class discreteTransients
 
         $this->table = $this->wpdb->prefix.DISCRETE_TRANSIENT_TABLE;
 
-        add_action('activate_plugin', array($this, 'activate'));
-        add_action('deactivate_plugin', array($this, 'deactivate'));
+        if(is_admin()) {
+            add_action('activate_plugin', array($this, 'activate'));
+            add_action('deactivate_plugin', array($this, 'deactivate'));
+            add_action('init', array($this, 'flush'));
+        }
 
         add_filter( 'query', array($this, 'filter_query'));
 
@@ -113,6 +116,28 @@ class discreteTransients
         }
         $this->log("Status: Plugin table build.");
         $this->log("Status: Plugin activated.");
+    }
+
+    function flush()
+    {
+        $this_plugin = plugin_basename(__FILE__);
+
+        if($_REQUEST['action']==='flush' && $_REQUEST['plugin']===$this_plugin) {
+            $referer = get_admin_url(null, "plugins.php?flush=FAILED");
+
+            if(wp_verify_nonce($_REQUEST['_wpnonce'], 'flush-plugin_' . $this_plugin)) {
+                $this->deactivate();
+                if(!$this->build()) {
+                    wp_die("Cannot create transients table.");
+                }
+                $this->log("Status: Plugin table build.");
+                $this->log("Status: Plugin table flushed.");
+
+                $referer = get_admin_url(null, "plugins.php?flush=OK");
+            }
+
+            wp_redirect($referer, 301);
+        }
     }
 
     /**
@@ -170,7 +195,7 @@ SQL;
         }
 
         if ($plugin_file == $this_plugin) {
-            $link = '<a href="' . wp_nonce_url('plugins.php?action=activate&amp;plugin=' . $plugin_file . '&amp;plugin_status=' . $context . '&amp;paged=' . $_GET['paged'] . '&amp;s=' . $_GET['s'], 'activate-plugin_' . $plugin_file) . '" title="' . esc_attr__('Flush this table') . '" class="edit">' . __('Flush') . '</a>';
+            $link = '<a href="' . wp_nonce_url('index.php?action=flush&amp;plugin=' . $this_plugin, 'flush-plugin_' . $this_plugin) . '" title="' . esc_attr__('Flush this table') . '" class="edit">' . __('Flush') . '</a>';
             array_unshift($links, $link);
         }
 

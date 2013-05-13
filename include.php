@@ -31,14 +31,6 @@ THE SOFTWARE.
 
 */
 
-if(!defined('DISCRETE_TRANSIENT_LOG_QUERIES')) {
-    define('DISCRETE_TRANSIENT_LOG_QUERIES', false);
-}
-
-if(!defined('DISCRETE_TRANSIENT_TABLE')) {
-    define('DISCRETE_TRANSIENT_TABLE', 'transients');
-}
-
 class discreteTransients
 {
     static  $instance = null;
@@ -56,7 +48,7 @@ class discreteTransients
         global $wpdb;
         $this->wpdb =& $wpdb;
 
-        $this->table = $this->wpdb->prefix.DISCRETE_TRANSIENT_TABLE;
+        $this->table = $this->wpdb->prefix.apply_filters('discrete_transients/table_name', 'transients');
 
         if(is_admin()) {
             add_action('activate_plugin', array($this, 'activate'));
@@ -209,7 +201,7 @@ SQL;
 
     function log($str)
     {
-        if(DISCRETE_TRANSIENT_LOG_QUERIES) {
+        if(apply_filters('discrete_transients/log_queries', false)) {
             $fp = fopen(dirname(__FILE__).'/debug.log', 'a');
             if(strlen($str)>256) {
                 $str = substr($str,0,256).'...';

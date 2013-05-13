@@ -118,7 +118,7 @@ class discreteTransients
         $this->log("Status: Plugin activated.");
     }
 
-    function flush()
+    public function flush()
     {
         $this_plugin = plugin_basename(__FILE__);
 
@@ -160,7 +160,7 @@ CREATE TABLE `{$this->table}` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 SQL;
 
-        return $this->wpdb->query($sql);
+        return $this->wpdb->query($sql)===false ? false : true;
     }
 
     /**
@@ -169,13 +169,13 @@ SQL;
      * @param void
      *
      */
-    function drop()
+    private function drop()
     {
         $sql =
 <<<SQL
 DROP TABLE IF EXISTS `{$this->table}`;
 SQL;
-        return $this->wpdb->query($sql);
+        return $this->wpdb->query($sql)===false ? false : true;
     }
 
     /**
@@ -186,7 +186,7 @@ SQL;
      * @return               array   Modified array of links
      *
      */
-    function flush_link($links, $plugin_file)
+    public function flush_link($links, $plugin_file)
     {
         static $this_plugin;
 
@@ -223,7 +223,7 @@ SQL;
      * @returns      string Modified SQL query
      *
      */
-    function filter_query($sql)
+    public function filter_query($sql)
     {
         $dirty = false;
 

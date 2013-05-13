@@ -225,13 +225,13 @@ SQL;
      */
     function filter_query($sql)
     {
-        if(strstr($sql, '_transient_' )) {
-            $sql = str_replace($this->wpdb->options, $this->table, $sql);
+        $dirty = false;
 
-            if(DISCRETE_TRANSIENT_LOG_QUERIES) {
-                $fp = fopen(dirname(__FILE__).'/debug.log', 'a');
-                fwrite($fp, trim($sql)."\n");
-                fclose($fp);
+        // Handle requests to options table
+        if(strstr($sql, $this->wpdb->options)) {
+            if(strstr($sql, '_transient_' )) {
+                $sql = str_replace($this->wpdb->options, $this->table, $sql);
+                $dirty = true;
             }
         }
 

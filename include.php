@@ -255,6 +255,16 @@ SQL;
                 $sql = str_replace($this->wpdb->options, $this->table, $sql);
                 $dirty = true;
             }
+            // Special case: Handle autoload query for transients and options
+            if(strstr($sql, "SELECT option_name, option_value FROM {$this->wpdb->options} WHERE autoload = 'yes'")) {
+                $sql =
+<<<SQL
+(SELECT option_name, option_value FROM {$this->wpdb->options} WHERE autoload = 'yes')
+UNION
+(SELECT option_name, option_value FROM {$this->table} WHERE autoload = 'yes')
+SQL;
+                $dirty = true;
+            }
         }
 
         if($dirty) {
@@ -268,5 +278,8 @@ SQL;
 }
 
 global $wp_discrete_transients;
-
 $wp_discrete_transients = discreteTransients::instance();
+
+// Replay getting the autoloaded options now with included and active plugin
+wp_cache_delete( 'alloptions', 'options' );
+wp_load_alloptions();

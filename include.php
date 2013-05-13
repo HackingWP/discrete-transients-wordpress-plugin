@@ -73,7 +73,9 @@ class discreteTransients
     function instance()
     {
         if(static::$instance===null) {
-            return new discreteTransients();
+            $instance = new discreteTransients();
+            $instance->log("\n\n\nStatus: Plugin started\n\n");
+            return $instance;
         }
 
         return static::$instance;
@@ -92,6 +94,8 @@ class discreteTransients
                 wp_die('Failed to drop old transient table.');
             }
         }
+        $this->log("Status: Plugin table dropped.");
+        $this->log("Status: Plugin deactivated.");
     }
 
     /**
@@ -107,6 +111,8 @@ class discreteTransients
         if(!$this->build()) {
             wp_die("Cannot create transients table.");
         }
+        $this->log("Status: Plugin table build.");
+        $this->log("Status: Plugin activated.");
     }
 
     /**
@@ -202,6 +208,12 @@ SQL;
                 fwrite($fp, trim($sql)."\n");
                 fclose($fp);
             }
+        }
+
+        if($dirty) {
+            $this->log("✓ SQL: ".$sql);
+        } else {
+            $this->log("✖ SQL: ".$sql);
         }
 
         return $sql;

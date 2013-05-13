@@ -114,6 +114,11 @@ class discreteTransients
         if(!$this->build()) {
             wp_die("Cannot create transients table.");
         }
+
+        if(!$this->flush_options()) {
+            wp_die("Cannot flush options table.");
+        }
+
         $this->log("Status: Plugin table build.");
         $this->log("Status: Plugin activated.");
     }
@@ -215,6 +220,23 @@ SQL;
     }
 
     /**
+     * Clears `wp_options` table
+     *
+     * @param void
+     * @returns mixed
+     *
+     */
+    private function flush_options()
+    {
+        $sql = "DELETE FROM {$this->wpdb->options} WHERE option_name LIKE '%_transient_%'; #discrete-transients-skip";
+        if($this->wpdb->query($sql)===false) {
+            return false;
+        }
+        $sql = "OPTIMIZE TABLE {$this->wpdb->options}";
+        return $this->wpdb->query($sql)===false ? false : true;
+    }
+
+    /**
      * Plugin magic happens here
      *
      * By modifying table from/to which WordPress writes to/reads from transients.
@@ -228,7 +250,7 @@ SQL;
         $dirty = false;
 
         // Handle requests to options table
-        if(strstr($sql, $this->wpdb->options)) {
+        if(!strstr($sql, '#discrete-transients-skip') && strstr($sql, $this->wpdb->options)) {
             if(strstr($sql, '_transient_' )) {
                 $sql = str_replace($this->wpdb->options, $this->table, $sql);
                 $dirty = true;

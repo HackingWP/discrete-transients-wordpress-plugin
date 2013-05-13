@@ -171,6 +171,18 @@ SQL;
         return $links;
     }
 
+    function log($str)
+    {
+        if(DISCRETE_TRANSIENT_LOG_QUERIES) {
+            $fp = fopen(dirname(__FILE__).'/debug.log', 'a');
+            if(strlen($str)>256) {
+                $str = substr($str,0,256).'...';
+            }
+            fwrite($fp, date("[c] "). $str."\n");
+            fclose($fp);
+        }
+    }
+
     /**
      * Plugin magic happens here
      *

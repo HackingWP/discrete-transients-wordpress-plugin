@@ -4,7 +4,7 @@
 Plugin Name:    Discrete Transients API
 Plugin URI:     http://www.attitude.sk
 Description:    Moves transients to separate table for custom control
-Version:        v0.1.0
+Version:        v0.1.1
 Author:         Martin Adamko
 Author URI:     http://www.attitude.sk
 License:        The MIT License (MIT)

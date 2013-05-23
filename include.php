@@ -73,7 +73,7 @@ class discreteTransients
      * Returns singleton instance of this class
      *
      */
-    function instance()
+    static function instance()
     {
         if(static::$instance===null) {
             $instance = new discreteTransients();
@@ -127,7 +127,7 @@ class discreteTransients
     {
         $this_plugin = plugin_basename(__FILE__);
 
-        if($_REQUEST['action']==='flush' && $_REQUEST['plugin']===$this_plugin) {
+        if(isset($_REQUEST['action']) && $_REQUEST['action']==='flush' && $_REQUEST['plugin']===$this_plugin) {
             $referer = get_admin_url(null, "plugins.php?flush=FAILED");
 
             if(wp_verify_nonce($_REQUEST['_wpnonce'], 'flush-plugin_' . $this_plugin)) {
